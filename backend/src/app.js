@@ -19,7 +19,9 @@ app.use(express.urlencoded({extended: true, limit:"16kb"}));
 app.use(express.static("public"))
 app.use(cookieParser());
 
+import chatRouter from "./routes/chatRoutes.js"
 
-// app.use('/api/v1/user/', userRouter);
+
+app.use('/api/v1', chatRouter);
 
 export {app}
