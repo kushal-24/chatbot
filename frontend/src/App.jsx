@@ -1,35 +1,56 @@
+import { useState } from 'react';
 import './App.css'
 import ChatbotUI from './ChatBotUI';
+import { msgApi } from './api/api';
 
-const sendMessageToServer=(message)=>{
-
-}
+/**
+ res
+ └── data        ← Axios puts response body here
+     ├── statusCode
+     ├── message
+     └── data    ← your apiResponse payload
+         ├── role
+         └── content
+ */
 
 function App() {
-  const sampleMessages = [
-    {
-      id: "1",
-      role: "assistant",
-      content: "Hello! How can I assist you today?",
-      timestamp: new Date(Date.now() - 300000),
-    },
-    {
-      id: "2",
-      role: "user",
-      content: "Can you help me understand how this chatbot UI works?",
-      timestamp: new Date(Date.now() - 240000),
-    },
-    {
-      id: "3",
-      role: "assistant",
-      content:
-        "Of course! This is a modern chatbot interface designed with a clean, professional look. It features message bubbles, avatars, timestamps, and a responsive input area. The UI is built with React and Tailwind CSS for a smooth user experience.",
-      timestamp: new Date(Date.now() - 180000),
-    },
-  ];
-  
+const[messages, setMessages]=useState([])
+const [loading, setLoading] = useState(false);
+
+const sendMessageToServer= async(message)=>{
+
+  if(!message.content.trim() || loading) return;
+
+  const updatedMsgs=[...messages, message];
+  setMessages(updatedMsgs);
+
+  try {
+    setLoading(true)
+    const apiMessages = updatedMsgs.map(({ role, content }) => ({
+      role,
+      content
+    }));
+    const res= await msgApi(apiMessages);
+    const aiReply= res.data.data;
+    const finalReply = {
+      role: aiReply.role,      // "assistant"
+      content: aiReply.content,
+      timestamp: Date.now()
+    };
+    
+    setMessages((prev)=>[...prev, finalReply]);
+  } catch (error) {
+    setMessages((prev) => [
+      ...prev,
+      { role: "assistant", content: "Something went wrong. Please try again." }
+    ]);
+  }
+  finally{
+    setLoading(false)
+  }
+} 
   return <ChatbotUI 
-  messagesArray={sampleMessages} 
+  messagesArray={messages} 
   isLoading={false}
   onSendMessage={sendMessageToServer} />;
 }

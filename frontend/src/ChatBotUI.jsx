@@ -11,12 +11,16 @@ function ChatbotUI({
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget); //store all form's data inside form with input;'s name attrobute as key
-
-    if (message.trim() && onSendMessage) {
-      onSendMessage(message);
-      e.currentTarget.reset();
+    //const formData = new FormData(e.currentTarget); //store all form's data inside form with input;'s name attrobute as key
+    const payload= {
+      role: "user",
+      content: message,
+      timestamp: Date.now()
     }
+    if (message.trim() && onSendMessage) {
+      onSendMessage(payload);
+    }
+    setMessage("");
   };
 
   return (
@@ -64,7 +68,7 @@ function ChatbotUI({
                 : "bg-slate-200 hover:bg-slate-300 text-slate-600"
             }`}
           >
-            {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            {isDark ? <Sun className="w-5 h-5 cursor-pointer" /> : <Moon className="w-5 h-5 cursor-pointer" />}
           </button>
         </div>
       </div>
@@ -104,7 +108,7 @@ function ChatbotUI({
         ) : (
           messagesArray.map((message) => (
             <div
-              key={message.id}
+              key={message._id}
               className={`flex gap-3 ${
                 message.role === "user" ? "flex-row-reverse" : ""
               }`}
@@ -177,14 +181,18 @@ function ChatbotUI({
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto flex gap-3">
           <textarea
             name="message"
+            value={message}
             placeholder="Type your message..."
             onChange={(e)=>setMessage(e.target.value)}
-            className="flex-1 px-4 py-3 rounded-xl border resize-none"
-          />
+            className={`flex-1 px-4 py-3 rounded-xl resize-none outline-none transition
+              ${isDark
+                ? "bg-slate-800 text-slate-100 placeholder-slate-400 border border-slate-700 focus:border-blue-500"
+                : "bg-white text-slate-900 placeholder-slate-500 border border-slate-300 focus:border-blue-500"
+              }`}          />
           <button
             type="submit"
             disabled={isLoading}
-            className="w-12 h-12 bg-blue-500 text-white rounded-xl flex items-center justify-center">
+            className="w-12 h-12 hover:bg-blue-500/90 cursor-pointer bg-blue-500 text-white rounded-xl flex items-center justify-center">
             <Send />
           </button>
         </form>
